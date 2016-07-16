@@ -1,0 +1,11 @@
+.gradle/
+.idea/
+build/
+layer.xml
+/data.gpkg
+GeoPackage.ipr
+GeoPackage.iws
+GeoPackage.iml
+/tile.png
+.DS_Store
+src/test/resources/data2.gpkg

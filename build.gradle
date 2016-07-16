@@ -1,0 +1,98 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.5.RELEASE")
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'geopackageserver'
+    version =  '0.1-SNAPSHOT'
+}
+
+sourceSets {
+    e2e {
+        groovy.srcDir    file('src/e2e/groovy')
+        resources.srcDir file('src/e2e/resources')
+    }
+}
+
+task e2e(type: Test) {
+    systemProperty "webdriver.chrome.driver", System.getProperty("webdriver.chrome.driver")
+    testClassesDir = sourceSets.e2e.output.classesDir
+    classpath = sourceSets.e2e.runtimeClasspath
+}
+
+tasks.withType(Test) {
+    systemProperty "org.geotools.referencing.forceXY", "true"
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://repo.boundlessgeo.com/main"
+    }
+    maven {
+        url "http://download.osgeo.org/webdav/geotools/"
+    }
+    mavenCentral()
+}
+
+bootRun {
+    if ( project.hasProperty('args') ) {
+        args project.args.split('\\s+')
+    } else {
+        args "--file=data.gpkg"
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-devtools"
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-freemarker"
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile("org.geoscript:geoscript-groovy:1.8-SNAPSHOT") {
+        exclude module: "gt-jdbc-postgis"
+        exclude module: "gt-jdbc-h2"
+        exclude module: "gt-jdbc-mysql"
+        exclude module: "gt-jdbc-spatialite"
+        exclude module: "gt-netcdf"
+        exclude module: "gt-charts"
+        exclude module: "gt-swing"
+        exclude module: "gt-geotiff"
+        exclude module: "gt-image"
+        exclude module: "gt-imagemosaic"
+        exclude module: "gt-arcgrid"
+        exclude module: "gt-grassraster"
+        exclude module: "gt-gtopo30"
+        exclude module: "gt-imagepyramid"
+        exclude module: "gt-imageio-ext-gdal"
+        exclude module: "gt-mbtiles"
+        exclude module: "gdal"
+        exclude module: "gt-ogr-jni"
+    }
+    testCompile("junit:junit")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+    testCompile("com.jayway.jsonpath:json-path:0.8.1")
+
+    e2eCompile sourceSets.main.output
+    e2eCompile configurations.testCompile
+    e2eCompile sourceSets.test.output
+    e2eRuntime configurations.testRuntime
+    e2eCompile "org.seleniumhq.selenium:selenium-java:2.53.0"
+    e2eCompile "org.seleniumhq.selenium:selenium-chrome-driver:2.53.0"
+    e2eCompile "org.seleniumhq.selenium:selenium-support:2.53.0"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.13'
+}
