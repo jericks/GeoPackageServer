@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jericks/GeoPackageServer.svg?branch=master)](https://travis-ci.org/jericks/GeoPackageServer)
+
 GeoPackage Server
 --------------
 Serve your GeoPackage database on the web.
