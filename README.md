@@ -164,6 +164,12 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"random","projectio
 curl -X DELETE http://localhost:8080/layers/random
 ```
 
+**Update a Layer**
+
+```bash
+curl -X PUT -d field=pid -d value=1 -d cql=ALL http://localhost:8080/layers/random
+```
+
 **Add a Feature**
 
 ```bash

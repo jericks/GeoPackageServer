@@ -217,6 +217,46 @@ class RestReadWriteTest {
     }
 
     @Test
+    void updateFeatures() {
+
+        // Create Layer
+        String schema = '{"name":"points","projection": "EPSG:4326","geometry": "geom","fields":[{"name":"geom","type":"Point","geometry": "true", "projection":"EPSG:4326"},{"name":"pid","type":"int"},{"name":"area","type":"double"}]}'
+        mockMvc.perform(post("/layers/points").content(schema))
+                .andExpect(status().isCreated())
+
+        // Add Feature
+        [
+                '{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{"pid":1}}',
+                '{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{"pid":2}}',
+                '{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{"pid":3}}',
+                '{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{"pid":4}}'
+        ].each { String feature ->
+            mockMvc.perform(post("/layers/points/feature").content(feature))
+                    .andExpect(status().isCreated())
+        }
+
+        // Get Features
+        mockMvc.perform(get("/layers/points/features.json"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$.type', is('FeatureCollection')))
+                .andExpect(jsonPath('$.features', hasSize(4)))
+
+        // Update Features
+        mockMvc.perform(put("/layers/points").param("field","area").param("value","10").param("cql","pid>2"))
+                .andExpect(status().isOk())
+
+        // Get Features again
+        mockMvc.perform(get("/layers/points/features.json").param("cql","area=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$.type', is('FeatureCollection')))
+                .andExpect(jsonPath('$.features', hasSize(2)))
+
+        // Delete Layer
+        mockMvc.perform(delete("/layers/points"))
+                .andExpect(status().isOk())
+    }
+
+    @Test
     void createAndDeleteTileLayer() {
 
         // Create Tile Layer

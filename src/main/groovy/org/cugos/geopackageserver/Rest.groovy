@@ -158,6 +158,20 @@ class Rest {
         }
     }
 
+    @RequestMapping(value = "layers/{name}", method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity<String> updateLayer(@PathVariable String name, @RequestParam String field, @RequestParam String value, @RequestParam String cql) {
+        log.info("Updating Layer: ${name} Field: ${field} to ${value} for ${cql}")
+        if (config.readOnly) {
+            new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
+        } else {
+            Layer layer = config.getVectorLayer(name)
+            Field fld = layer.schema.field(field)
+            layer.update(fld, value, cql)
+            new ResponseEntity<String>(HttpStatus.OK)
+        }
+    }
+
     @RequestMapping(value = "layers/{name}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<String> deleteLayer(@PathVariable String name) {
