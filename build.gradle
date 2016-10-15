@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.8.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
     }
 }
 
@@ -85,7 +85,6 @@ dependencies {
     }
     testCompile("junit:junit")
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("com.jayway.jsonpath:json-path:0.8.1")
 
     e2eCompile sourceSets.main.output
     e2eCompile configurations.testCompile
