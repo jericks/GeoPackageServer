@@ -43,7 +43,7 @@ class Config implements ApplicationListener<EmbeddedServletContainerInitializedE
     }
 
     GeoPackage getTileLayer(String name) {
-        new GeoPackage(file, name)
+        new GeoPackage(workspace.dataSource, name)
     }
 
     Layer getVectorLayer(String name) {
@@ -51,16 +51,7 @@ class Config implements ApplicationListener<EmbeddedServletContainerInitializedE
     }
 
     void deleteTileLayer(String name) {
-        Sql.withInstance("jdbc:sqlite:${file.absolutePath}", "org.sqlite.JDBC") { Sql sql ->
-            [
-                    "DROP TABLE ${name}",
-                    "DELETE from gpkg_contents WHERE table_name = '${name}' and data_type = 'tiles'",
-                    "DELETE FROM gpkg_tile_matrix WHERE table_name = '${name}'",
-                    "DELETE FROM gpkg_tile_matrix_set WHERE table_name = '${name}'"
-            ].each { String cmd ->
-                sql.execute(cmd.toString())
-            }
-        }
+        getTileLayer(name).delete()
     }
 
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
