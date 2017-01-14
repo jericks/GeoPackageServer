@@ -25,14 +25,14 @@ Run end to end tests
 
 Run
 ---
-```bash
-java -jar geopackageserver-0.2.0.jar --file=data.gpkg --readOnly=true
+
+java -jar geopackageserver-0.3-SNAPSHOT.jar --file=data.gpkg --readOnly=true
 ```
 
 or if you are building the project:
 
 ```bash
-java -jar build/libs/geopackageserver-0.2.0.jar --file=data.gpkg --readOnly=true
+java -jar build/libs/geopackageserver-0.3-SNAPSHOT.jar --file=data.gpkg --readOnly=true
 ```
 
 and browse to http://localhost:8080:

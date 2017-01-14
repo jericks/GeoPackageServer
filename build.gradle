@@ -13,7 +13,7 @@ apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'geopackageserver'
-    version =  '0.2.0'
+    version =  '0.3-SNAPSHOT'
 }
 
 sourceSets {
@@ -62,8 +62,8 @@ dependencies {
     compile "org.springframework.boot:spring-boot-devtools"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-freemarker"
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-    compile("org.geoscript:geoscript-groovy:1.8.0") {
+    compile 'org.codehaus.groovy:groovy-all:2.4.8'
+    compile("org.geoscript:geoscript-groovy:1.9-SNAPSHOT") {
         exclude module: "gt-jdbc-postgis"
         exclude module: "gt-jdbc-h2"
         exclude module: "gt-jdbc-mysql"
