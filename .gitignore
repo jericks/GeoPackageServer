@@ -9,3 +9,4 @@ GeoPackage.iml
 /tile.png
 .DS_Store
 src/test/resources/data2.gpkg
+e2e.sh

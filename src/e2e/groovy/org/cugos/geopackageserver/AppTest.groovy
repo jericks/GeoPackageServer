@@ -15,18 +15,15 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.interactions.Action
 import org.openqa.selenium.interactions.Actions
-import org.springframework.boot.test.IntegrationTest
-import org.springframework.boot.test.SpringApplicationConfiguration
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
 import static org.junit.Assert.*
 
 @RunWith(SpringJUnit4ClassRunner)
-@SpringApplicationConfiguration(classes = App)
+@SpringBootTest(classes = App, webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT, properties = "server.port=8080")
 @TestPropertySource(locations = "classpath:readWrite.properties")
-@WebAppConfiguration
-@IntegrationTest(value="server.port=8080")
 class AppTest {
 
     private WebDriver browser
