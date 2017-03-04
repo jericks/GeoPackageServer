@@ -62,7 +62,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-devtools"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-freemarker"
-    compile 'org.codehaus.groovy:groovy-all:2.4.8'
+    compile 'org.codehaus.groovy:groovy-all:2.4.9'
     compile("org.geoscript:geoscript-groovy:1.9-SNAPSHOT") {
         exclude module: "gt-jdbc-postgis"
         exclude module: "gt-jdbc-h2"
