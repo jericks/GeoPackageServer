@@ -85,12 +85,28 @@
           new ol.layer.Tile({
             source: new ol.source.OSM()
           }),
+          new ol.layer.VectorTile({
+              source: new ol.source.VectorTile({
+                format: new ol.format.MVT(),
+                url: '/layers/${layer.name}/tile/mvt/{z}/{x}/{y}',
+                tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
+              })
+          })
+          /*
+          new ol.layer.VectorTile({
+              source: new ol.source.VectorTile({
+                format: new ol.format.GeoJSON(),
+                url: '/layers/${layer.name}/tile/json/{z}/{x}/{y}',
+                tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
+              })
+          })
           new ol.layer.Vector({
             source: new ol.source.Vector({
                  format: new ol.format.GeoJSON(),
                  url: '/layers/${layer.name}/features.json'
             })
           })
+          */
         ],
         view: new ol.View({
           center: ol.proj.fromLonLat([37.41, 8.82]),

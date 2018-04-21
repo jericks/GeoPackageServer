@@ -11,6 +11,8 @@ import geoscript.layer.GeoPackage
 import geoscript.layer.ImageTile
 import geoscript.layer.Layer
 import geoscript.layer.Pyramid
+import geoscript.layer.Tile
+import geoscript.layer.VectorTileRenderer
 import geoscript.layer.io.JsonPyramidWriter
 import geoscript.layer.io.PyramidWriter
 import geoscript.layer.io.Writer
@@ -396,4 +398,26 @@ class Rest {
         out.close()
         out.toByteArray()
     }
+
+    @RequestMapping(value = "layers/{name}/tile/{type}/{z}/{x}/{y}", method = RequestMethod.GET)
+    @ResponseBody
+    HttpEntity<byte[]> vectorTiles(@PathVariable String name, @PathVariable String type, @PathVariable int z, @PathVariable int x, @PathVariable int y) {
+        println "Vector Tile ${type} ${z} / ${x} / ${y}"
+        Layer layer = config.getVectorLayer(name)
+        Pyramid pyramid = Pyramid.createGlobalMercatorPyramid()
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM
+        if (type.equalsIgnoreCase("json")) {
+            type = "geojson"
+            mediaType = MediaType.APPLICATION_JSON
+        }
+        Writer writer = Writers.find(type)
+        VectorTileRenderer renderer = new VectorTileRenderer(writer, layer, layer.schema.fields)
+        Bounds bounds = pyramid.bounds(new Tile(z,x,y))
+        byte[] bytes = renderer.render(bounds)
+        HttpHeaders headers = new HttpHeaders()
+        headers.setContentType(mediaType)
+        headers.setContentLength(bytes.length)
+        new HttpEntity<byte[]>(bytes, headers)
+    }
+
 }
