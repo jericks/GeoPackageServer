@@ -10,6 +10,7 @@ import geoscript.geom.Bounds
 import geoscript.layer.GeoPackage
 import geoscript.layer.ImageTile
 import geoscript.layer.Layer
+import geoscript.layer.PbfVectorTileRenderer
 import geoscript.layer.Pyramid
 import geoscript.layer.Tile
 import geoscript.layer.VectorTileRenderer
@@ -402,18 +403,24 @@ class Rest {
     @RequestMapping(value = "layers/{name}/tile/{type}/{z}/{x}/{y}", method = RequestMethod.GET)
     @ResponseBody
     HttpEntity<byte[]> vectorTiles(@PathVariable String name, @PathVariable String type, @PathVariable int z, @PathVariable int x, @PathVariable int y) {
-        println "Vector Tile ${type} ${z} / ${x} / ${y}"
         Layer layer = config.getVectorLayer(name)
         Pyramid pyramid = Pyramid.createGlobalMercatorPyramid()
-        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM
-        if (type.equalsIgnoreCase("json")) {
-            type = "geojson"
-            mediaType = MediaType.APPLICATION_JSON
-        }
-        Writer writer = Writers.find(type)
-        VectorTileRenderer renderer = new VectorTileRenderer(writer, layer, layer.schema.fields)
+        pyramid.origin = Pyramid.Origin.TOP_LEFT
         Bounds bounds = pyramid.bounds(new Tile(z,x,y))
-        byte[] bytes = renderer.render(bounds)
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM
+        byte[] bytes
+        if (type.equalsIgnoreCase("pbf")) {
+            PbfVectorTileRenderer renderer = new PbfVectorTileRenderer(layer, layer.schema.fields)
+            bytes = renderer.render(bounds)
+        } else {
+            if (type.equalsIgnoreCase("json")) {
+                type = "geojson"
+                mediaType = MediaType.APPLICATION_JSON
+            }
+            Writer writer = Writers.find(type)
+            VectorTileRenderer renderer = new VectorTileRenderer(writer, layer, layer.schema.fields)
+            bytes = renderer.render(bounds)
+        }
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(mediaType)
         headers.setContentLength(bytes.length)

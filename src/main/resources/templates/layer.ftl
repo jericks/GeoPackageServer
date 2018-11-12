@@ -14,6 +14,9 @@
             width: 100%;
             padding-right: 20px;
         }
+        .active {
+            font-weight: bold;
+        }
     </style>
     <script src="/ol.js" type="text/javascript"></script>
 </head>
@@ -41,6 +44,8 @@
                 <div><a href="/layers/${layer.name}/bounds">Bounds</a></div>
                 <div><a href="/layers/${layer.name}/features.json">Features (GeoJson)</a></div>
                 <div><a href="/layers/${layer.name}/features.csv">Features (CSV)</a></div>
+                <div><a href="/layers/${layer.name}/tile/json/2/1/1">Feature Vector Tile (GeoJson)</a></div>
+                <div><a href="/layers/${layer.name}/tile/pbf/2/1/1">Feature Vector Tile (PBF)</a></div>
                 <div><a href="/layers/${layer.name}/gdal">QGIS Layer</a></div>
             </div>
             <div class="grd-row-col-5-6 fields">
@@ -68,6 +73,9 @@
         <div class="grd-row">
             <div class="grd-row-col-4-6 map">
                 <h4 class="fnt--green">Map</h4>
+                <a href="#" id="json" class="">JSON</a> |
+                <a href="#" id="json_tiles" class="">JSON Tiles</a> |
+                <a href="#" id="pbf_tiles" class="active">PBF Tiles</a>
                 <div id="map" class="map"></div>
             </div>
             <div class="grd-row-col-6-6 values">
@@ -79,34 +87,71 @@
     </div>
 
     <script type="text/javascript">
+
+      var mvtVectorTileLayer = new ol.layer.VectorTile({
+        source: new ol.source.VectorTile({
+            format: new ol.format.MVT(),
+            projection: 'EPSG:3857',
+            url: '/layers/${layer.name}/tile/pbf/{z}/{x}/{y}',
+            tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
+        })
+      });
+
+      var geoJSONVectorTileLayer = new ol.layer.VectorTile({
+        source: new ol.source.VectorTile({
+            format: new ol.format.GeoJSON(),
+            tilePixelRatio: 1,
+            projection: new ol.proj.Projection("EPSG:4326"),
+            url: '/layers/${layer.name}/tile/json/{z}/{x}/{y}',
+            tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
+        })
+      });
+
+      var geoJSONVectorLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+             format: new ol.format.GeoJSON(),
+             url: '/layers/${layer.name}/features.json'
+        })
+      });
+
+      var activeLayer = mvtVectorTileLayer;
+
+      var setActiveLayer = function(name) {
+
+        // Remove previous active layer
+        if (activeLayer) {
+            map.removeLayer(activeLayer);
+        }
+
+        // Remove active class from ui
+        document.getElementById("json").classList.remove('active');
+        document.getElementById("json_tiles").classList.remove('active');
+        document.getElementById("pbf_tiles").classList.remove('active');
+
+        // Set the new active layer
+        if (name === 'json') {
+            activeLayer = geoJSONVectorLayer;
+            document.getElementById("json").classList.add('active');
+        } else if (name === 'json_tiles') {
+            activeLayer = geoJSONVectorTileLayer;
+            document.getElementById("json_tiles").classList.add('active');
+        } else if (name === 'pbf_tiles') {
+            activeLayer = mvtVectorTileLayer;
+            document.getElementById("pbf_tiles").classList.add('active');
+        }
+
+        // Add active layer to map and refresh
+        map.addLayer(activeLayer);
+        map.renderSync();
+      };
+
       var map = new ol.Map({
         target: 'map',
         layers: [
           new ol.layer.Tile({
             source: new ol.source.OSM()
           }),
-          new ol.layer.VectorTile({
-              source: new ol.source.VectorTile({
-                format: new ol.format.MVT(),
-                url: '/layers/${layer.name}/tile/mvt/{z}/{x}/{y}',
-                tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
-              })
-          })
-          /*
-          new ol.layer.VectorTile({
-              source: new ol.source.VectorTile({
-                format: new ol.format.GeoJSON(),
-                url: '/layers/${layer.name}/tile/json/{z}/{x}/{y}',
-                tileGrid: ol.tilegrid.createXYZ({maxZoom: 19})
-              })
-          })
-          new ol.layer.Vector({
-            source: new ol.source.Vector({
-                 format: new ol.format.GeoJSON(),
-                 url: '/layers/${layer.name}/features.json'
-            })
-          })
-          */
+          activeLayer
         ],
         view: new ol.View({
           center: ol.proj.fromLonLat([37.41, 8.82]),
@@ -128,6 +173,22 @@
          })
          elem.innerHTML = html;
       });
+
+      document.getElementById("json").addEventListener('click', function(e) {
+         e.preventDefault();
+         setActiveLayer('json');
+      });
+
+      document.getElementById("json_tiles").addEventListener('click', function(e) {
+         e.preventDefault();
+         setActiveLayer('json_tiles');
+      });
+
+      document.getElementById("pbf_tiles").addEventListener('click', function(e) {
+         e.preventDefault();
+         setActiveLayer('pbf_tiles');
+      });
+
     </script>
 
 </body>

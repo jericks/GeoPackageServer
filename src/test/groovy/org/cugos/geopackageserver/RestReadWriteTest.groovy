@@ -32,6 +32,7 @@ class RestReadWriteTest {
 
     @BeforeClass
     static void preSetup() {
+        System.setProperty("org.geotools.referencing.forceXY", "true")
         File source = new File("src/test/resources/data.gpkg")
         File destination = new File("src/test/resources/data2.gpkg")
         FileUtils.copyFile(source, destination)
@@ -389,5 +390,19 @@ class RestReadWriteTest {
                 .andExpect(xpath("/OGRVRTDataSource/OGRVRTLayer/LayerSRS").string("EPSG:4326"))
                 .andExpect(xpath("/OGRVRTDataSource/OGRVRTLayer/SrcLayer").string("OGRGeoJSON"))
 
+    }
+
+    @Test
+    void jsonVectorTile() {
+        MvcResult result = mockMvc.perform(get("/layers/countries/tile/json/3/3/3"))
+                .andExpect(status().isOk()).andReturn()
+        assertTrue result.response.contentAsByteArray.length > 0
+    }
+
+    @Test
+    void pbfVectorTile() {
+        MvcResult result = mockMvc.perform(get("/layers/countries/tile/pbf/3/3/3"))
+                .andExpect(status().isOk()).andReturn()
+        assertTrue result.response.contentAsByteArray.length > 0
     }
 }

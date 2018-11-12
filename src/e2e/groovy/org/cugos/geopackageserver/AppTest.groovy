@@ -446,10 +446,29 @@ class AppTest {
     }
 
     @Test
+    void clickOnFeatureVectorTileGeoJsonWebServiceForLayerCountries() {
+        browser.get("http://localhost:8080/layer/countries")
+        browser.findElement(By.linkText("Feature Vector Tile (GeoJson)")).click()
+        assertEquals("http://localhost:8080/layers/countries/tile/json/2/1/1", browser.getCurrentUrl())
+        captureScreenShot("layer_countries_feature_vector_tile_geojson_web_services")
+    }
+
+    @Test
     void qgisLayerWebServiceForCountries() {
         browser.get("http://localhost:8080/layer/countries")
         browser.findElement(By.linkText("QGIS Layer")).click()
         assertEquals("http://localhost:8080/layers/countries/gdal", browser.getCurrentUrl())
         captureScreenShot("layer_countries_gdal_service")
+    }
+
+    @Test
+    void switchMapVectorLayers() {
+        browser.get("http://localhost:8080/layer/countries")
+        browser.findElement(By.linkText("JSON")).click()
+        captureScreenShot("layer_countries_layer_json")
+        browser.findElement(By.linkText("JSON Tiles")).click()
+        captureScreenShot("layer_countries_layer_jsontiles")
+        browser.findElement(By.linkText("PBF Tiles")).click()
+        captureScreenShot("layer_countries_layer_pbf")
     }
 }

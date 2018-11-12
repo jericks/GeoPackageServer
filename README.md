@@ -152,6 +152,16 @@ curl http://localhost:8080/layers/countries/features.json
 curl -o countries.csv http://localhost:8080/layers/countries/features.csv
 ```
 
+**View Feature Vector Tiles**
+
+```bash
+curl http://localhost:8080/layers/countries/tile/json/3/2/1
+```
+
+```bash
+curl http://localhost:8080/layers/countries//tile/pbf/2/1/1
+```
+
 **Create a new Layer**
 
 ```bash
