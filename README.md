@@ -26,6 +26,7 @@ Run end to end tests
 Run
 ---
 
+```bash
 java -jar geopackageserver-0.3.0.jar --file=data.gpkg --readOnly=true
 ```
 
