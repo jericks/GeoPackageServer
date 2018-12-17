@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.17.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.18.RELEASE")
     }
 }
 
@@ -62,8 +62,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-devtools"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-freemarker"
-    compile 'org.codehaus.groovy:groovy-all:2.4.14'
-    compile("org.geoscript:geoscript-groovy:1.11-SNAPSHOT") {
+    compile("org.geoscript:geoscript-groovy:1.13-SNAPSHOT") {
         exclude module: "gt-jdbc-postgis"
         exclude module: "gt-jdbc-h2"
         exclude module: "gt-jdbc-mysql"
