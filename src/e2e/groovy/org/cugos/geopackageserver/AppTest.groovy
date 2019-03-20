@@ -13,12 +13,11 @@ import org.openqa.selenium.TakesScreenshot
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.interactions.Action
+import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.interactions.Actions
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.test.context.web.WebAppConfiguration
 import static org.junit.Assert.*
 
 @RunWith(SpringJUnit4ClassRunner)
@@ -48,7 +47,7 @@ class AppTest {
 
     @Before
     void before() {
-        browser = new ChromeDriver()
+        browser = new FirefoxDriver()
     }
 
     @After
@@ -83,7 +82,7 @@ class AppTest {
         browser.get("http://localhost:8080/")
         WebElement e = browser.findElement(By.className("layers"))
         List<WebElement> items = e.findElements(By.tagName("li"))
-        assertEquals(4, items.size())
+        assertEquals(5, items.size())
         items.eachWithIndex { WebElement item, int i ->
             if (i == 0) {
                 assertEquals "countries", item.text
@@ -92,6 +91,8 @@ class AppTest {
             } else if (i == 2) {
                 assertEquals "places", item.text
             } else if (i == 3) {
+                assertEquals "rivers", item.text
+            } else if (i == 4) {
                 assertEquals "states", item.text
             }
         }
@@ -380,7 +381,7 @@ class AppTest {
         assertEquals "Fields", div.findElement(By.tagName("h4")).text
         WebElement table = div.findElement(By.tagName("table"))
         assertEquals(["Name", "Type"], table.findElement(By.tagName("thead")).findElements(By.tagName("th")).collect { it.text })
-        assertEquals 47, table.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size()
+        assertEquals 95, table.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size()
         assertEquals(["the_geom","MultiPolygon"], table.findElement(By.tagName("tbody")).findElements(By.tagName("tr"))[0].findElements(By.tagName("td")).collect { it.text })
     }
 
@@ -405,9 +406,11 @@ class AppTest {
     @Test
     void identifyOnMapForLayerCountries() {
         browser.get("http://localhost:8080/layer/countries")
+        browser.findElement(By.linkText("JSON")).click()
+        Thread.sleep(4000)
         WebElement map = browser.findElement(By.id("map"))
         new Actions(browser)
-                .moveToElement(map, 114,192)
+                .moveToElement(map, 114,80)
                 .click().perform()
         Thread.sleep(2000)
         captureScreenShot("layer_map_countries_id")
@@ -442,7 +445,7 @@ class AppTest {
         browser.get("http://localhost:8080/layer/countries")
         browser.findElement(By.linkText("Features (GeoJson)")).click()
         assertEquals("http://localhost:8080/layers/countries/features.json", browser.getCurrentUrl())
-        captureScreenShot("layer_countries_features_geojson_web_services")
+        //captureScreenShot("layer_countries_features_geojson_web_services")
     }
 
     @Test

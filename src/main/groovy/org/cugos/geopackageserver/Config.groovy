@@ -3,16 +3,15 @@ package org.cugos.geopackageserver
 import geoscript.layer.GeoPackage
 import geoscript.layer.Layer
 import geoscript.workspace.Workspace
-import groovy.sql.Sql
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent
-import org.springframework.context.ApplicationListener
+import org.springframework.boot.web.server.WebServerFactoryCustomizer
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
 
 @Component
-class Config implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+class Config implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
     int port
 
@@ -54,8 +53,9 @@ class Config implements ApplicationListener<EmbeddedServletContainerInitializedE
         getTileLayer(name).delete()
     }
 
-    public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
-        port = event.getEmbeddedServletContainer().getPort()
+    @Override
+    void customize(ConfigurableServletWebServerFactory factory) {
+        port = factory.port
         hostName = InetAddress.localHost.hostName
     }
 }

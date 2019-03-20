@@ -71,11 +71,12 @@ class RestReadOnlyTest {
     void layers() {
         mockMvc.perform(get("/layers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath('$', hasSize(4)))
+                .andExpect(jsonPath('$', hasSize(5)))
                 .andExpect(jsonPath('$[0]', is('countries')))
                 .andExpect(jsonPath('$[1]', is('ocean')))
                 .andExpect(jsonPath('$[2]', is('places')))
-                .andExpect(jsonPath('$[3]', is('states')))
+                .andExpect(jsonPath('$[3]', is('rivers')))
+                .andExpect(jsonPath('$[4]', is('states')))
     }
 
     @Test
@@ -85,7 +86,7 @@ class RestReadOnlyTest {
                 .andExpect(jsonPath('$.name', is('countries')))
                 .andExpect(jsonPath('$.projection', is('EPSG:4326')))
                 .andExpect(jsonPath('$.geometry', is('the_geom')))
-                .andExpect(jsonPath('$.fields', hasSize(47)))
+                .andExpect(jsonPath('$.fields', hasSize(95)))
                 .andExpect(jsonPath('$.fields[0].name', is('the_geom')))
                 .andExpect(jsonPath('$.fields[0].type', is('MultiPolygon')))
                 .andExpect(jsonPath('$.fields[0].geometry', is(true)))
@@ -103,10 +104,10 @@ class RestReadOnlyTest {
     void layerBounds() {
         mockMvc.perform(get("/layers/countries/bounds"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath('$.minX', closeTo(new BigDecimal(-179.99), new BigDecimal(0.01))))
-                .andExpect(jsonPath('$.minY', is(-90.00000000000003 as Double)))
-                .andExpect(jsonPath('$.maxX', is(180.00000000000014 as Double)))
-                .andExpect(jsonPath('$.maxY', is(83.64513000000002 as Double)))
+                .andExpect(jsonPath('$.minX', is(-180.0 as Double)))
+                .andExpect(jsonPath('$.minY', is(-90.0 as Double)))
+                .andExpect(jsonPath('$.maxX', is(180.00000000000006 as Double)))
+                .andExpect(jsonPath('$.maxY', is(83.64513000000001 as Double)))
                 .andExpect(jsonPath('$.proj', is("EPSG:4326")))
     }
 
