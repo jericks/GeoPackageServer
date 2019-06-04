@@ -28,12 +28,17 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
+import springfox.documentation.annotations.ApiIgnore
 
 import javax.imageio.ImageIO
 import javax.servlet.http.HttpServletResponse
 import java.awt.image.RenderedImage
 
 @Log
+@Api(value = "GeoPackage REST API")
 @RestController
 class Rest {
 
@@ -41,14 +46,16 @@ class Rest {
     Config config
 
     @RequestMapping(value = "/", method = RequestMethod.GET, produces = "text/html")
-    public ModelAndView home(Model model) {
+    @ApiIgnore
+    ModelAndView home(Model model) {
         model.addAttribute("tiles", config.getTileLayerNames())
         model.addAttribute("layers", config.getVectorLayerNames())
         new ModelAndView("home")
     }
 
     @RequestMapping(value = "/tile/{name}", method = RequestMethod.GET, produces = "text/html")
-    public ModelAndView tile(@PathVariable String name, Model model) {
+    @ApiIgnore
+    ModelAndView tile(@PathVariable String name, Model model) {
         GeoPackage gpkg = config.getTileLayer(name)
         model.addAttribute("name", gpkg.name)
         model.addAttribute("projection", gpkg.proj.id)
@@ -61,7 +68,8 @@ class Rest {
     }
 
     @RequestMapping(value = "/layer/{name}", method = RequestMethod.GET, produces = "text/html")
-    public ModelAndView layer(@PathVariable String name, Model model) {
+    @ApiIgnore
+    ModelAndView layer(@PathVariable String name, Model model) {
         Layer gpkg = config.getVectorLayer(name)
         model.addAttribute("layer", gpkg)
         new ModelAndView("layer")
@@ -69,7 +77,8 @@ class Rest {
 
     @RequestMapping(value = "layers", method = RequestMethod.GET)
     @ResponseBody
-    public String getLayers() {
+    @ApiOperation(value="Vector Layers", notes="Get a List of Vector Layer names")
+    String getLayers() {
         List<String> names = config.getVectorLayerNames()
         JsonOutput.prettyPrint(
                 JsonOutput.toJson(names)
@@ -78,7 +87,10 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/schema", method = RequestMethod.GET)
     @ResponseBody
-    public String schema(@PathVariable String name) {
+    @ApiOperation(value="Schema", notes="Get a Vector Layer Schema")
+    String schema(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) {
         Layer layer = config.getVectorLayer(name)
         Schema schema = layer.schema
         Map json = [
@@ -104,7 +116,10 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/count", method = RequestMethod.GET)
     @ResponseBody
-    public String layerCount(@PathVariable String name) {
+    @ApiOperation(value="Feature Count", notes="Get a Vector Layer feature count")
+    String layerCount(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) {
         Layer layer = config.getVectorLayer(name)
         JsonOutput.prettyPrint(
                 JsonOutput.toJson([count: layer.count])
@@ -113,7 +128,10 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/bounds", method = RequestMethod.GET)
     @ResponseBody
-    public String layerBounds(@PathVariable String name) {
+    @ApiOperation(value="Layer Bounds", notes="Get the Bounds of a Vector Layer")
+    String layerBounds(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) {
         Layer layer = config.getVectorLayer(name)
         Bounds bounds = layer.bounds
         JsonOutput.prettyPrint(
@@ -129,9 +147,12 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/features.{type}", method = RequestMethod.GET)
     @ResponseBody
-    public String features(
-            @PathVariable String name,
-            @PathVariable String type, @RequestParam(name = "cql", required = false) String cql) {
+    @ApiOperation(value="Features", notes="Get Vector Layer Features")
+    String features(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @PathVariable @ApiParam("Output Type") String type,
+            @RequestParam(name = "cql", required = false) @ApiParam("CQL Filter") String cql
+    ) {
         Layer layer = config.getVectorLayer(name)
         if (cql) {
             Workspace workspace = new Memory()
@@ -148,7 +169,11 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createLayer(@PathVariable String name, @RequestBody String schemaStr) {
+    @ApiOperation(value="Create Layer", notes="Create a new Vector Layer")
+    ResponseEntity<String> createLayer(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @RequestBody @ApiParam("Schema Definition") String schemaStr
+    ) {
         log.info("Creating Layer: ${name} with Schema: ${schemaStr}")
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -163,7 +188,13 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateLayer(@PathVariable String name, @RequestParam String field, @RequestParam String value, @RequestParam String cql) {
+    @ApiOperation(value="Update Layer", notes="Update Features in a Vector Layer")
+    ResponseEntity<String> updateLayer(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @RequestParam @ApiParam("Field Name") String field,
+            @RequestParam @ApiParam("Value") String value,
+            @RequestParam @ApiParam("CQL Filter") String cql
+    ) {
         log.info("Updating Layer: ${name} Field: ${field} to ${value} for ${cql}")
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -177,7 +208,10 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteLayer(@PathVariable String name) {
+    @ApiOperation(value="Delete Layer", notes="Delete a Vector Layer")
+    ResponseEntity<String> deleteLayer(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) {
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
         } else {
@@ -188,7 +222,11 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/feature", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addFeature(@PathVariable String name, @RequestBody String featureJson) {
+    @ApiOperation(value="Add Feature", notes="Add a Feature to a Vector Layer")
+    ResponseEntity<String> addFeature(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @RequestBody @ApiParam("Feature GeoJSON") String featureJson
+    ) {
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
         } else {
@@ -202,7 +240,11 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/feature/{id:.+}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteFeature(@PathVariable String name, @PathVariable String id) {
+    @ApiOperation(value="Delete Feature", notes="Delete a Feature from a Vector Layer")
+    ResponseEntity<String> deleteFeature(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @PathVariable @ApiParam("Feature ID") String id
+    ) {
         log.info "Delete Feature ${id} from Layer ${name}"
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -216,7 +258,11 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/feature", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteFeatures(@PathVariable String name, @RequestParam String cql) {
+    @ApiOperation(value="Delete Features", notes="Delete Features from a Vector Layer")
+    ResponseEntity<String> deleteFeatures(
+            @PathVariable @ApiParam("Layer Name") String name,
+            @RequestParam @ApiParam("CQL Filter") String cql
+    ) {
         log.info "Delete Features from Layer ${name} using ${cql}"
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -228,7 +274,8 @@ class Rest {
 
     @RequestMapping(value = "tiles", method = RequestMethod.GET)
     @ResponseBody
-    public String getTiles() {
+    @ApiOperation(value="Tile Names", notes="Get Tile Layer Names")
+    String getTiles() {
         List<String> names = config.getTileLayerNames()
         JsonOutput.prettyPrint(
                 JsonOutput.toJson(names)
@@ -237,7 +284,11 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createTileLayer(@PathVariable String name, @RequestBody String pyramidStr) {
+    @ApiOperation(value="Create Tile Layer", notes="Create a new Tile Layer")
+    ResponseEntity<String> createTileLayer(
+            @PathVariable @ApiParam("Tile Name") String name,
+            @RequestBody @ApiParam("Pyramid Definition") String pyramidStr
+    ) {
         log.info "Creating Tile Layer named ${name} with Pyramid ${pyramidStr}"
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -251,7 +302,10 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<String> deleteTileLayer(@PathVariable String name) {
+    @ApiOperation(value="Delete Tile Layer", notes="Delete a Tile Layer")
+    ResponseEntity<String> deleteTileLayer(
+            @PathVariable @ApiParam("Tile Name") String name
+    ) {
         log.info "Deleting Tile Layer named ${name}"
         if (config.readOnly) {
             new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
@@ -263,9 +317,13 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/tile/{z}/{x}/{y}", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value="Get a Tile", notes="Get a Tile")
     HttpEntity<byte[]> getTile(
-            @PathVariable String name,
-            @PathVariable int z, @PathVariable int x, @PathVariable int y) throws IOException {
+            @PathVariable @ApiParam("Tile Name") String name,
+            @PathVariable @ApiParam("Zoom Level") int z,
+            @PathVariable @ApiParam("X") int x,
+            @PathVariable @ApiParam("Y") int y
+    ) throws IOException {
         GeoPackage gpkg = config.getTileLayer(name)
         ImageTile tile = gpkg.get(z, x, y)
         byte[] bytes = tile.data
@@ -274,9 +332,13 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/raster/{w}/{h}/{bounds}", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value="Get a Raster", notes="Stitch together a Raster from a set of tiles")
     HttpEntity<byte[]> raster(
-            @PathVariable String name,
-            @PathVariable int w, @PathVariable int h, @PathVariable String bounds) throws IOException {
+            @PathVariable @ApiParam(value = "Layer Name") String name,
+            @PathVariable @ApiParam(value = "Width") int w,
+            @PathVariable @ApiParam(value = "Height") int h,
+            @PathVariable @ApiParam(value = "Bounds") String bounds
+    ) throws IOException {
         GeoPackage gpkg = config.getTileLayer(name)
         String type = "png"
         Bounds b = Bounds.fromString(bounds)
@@ -288,7 +350,10 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/pyramid", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    String pyramid(@PathVariable String name) throws IOException {
+    @ApiOperation(value="Get Pyramid", notes="Get a Pyramid from a Tile Layer")
+    String pyramid(
+            @PathVariable @ApiParam("Tile Name") String name
+    ) throws IOException {
         GeoPackage gpkg = config.getTileLayer(name)
         PyramidWriter writer = new JsonPyramidWriter()
         writer.write(gpkg.pyramid)
@@ -296,7 +361,10 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/tile/counts", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    String tileCounts(@PathVariable String name) throws IOException {
+    @ApiOperation(value="Get Tile Layer Counts", notes="Get Tile Layer Counts")
+    String tileCounts(
+            @PathVariable @ApiParam("Tile Name") String name
+    ) throws IOException {
         GeoPackage gpkg = config.getTileLayer(name)
         JsonOutput.prettyPrint(
                 JsonOutput.toJson(gpkg.tileCounts)
@@ -305,10 +373,14 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/tile/{z}/{x}/{y}", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value="Create a Tile", notes="Create a Tile")
     HttpEntity<byte[]> createTile(
-            @PathVariable String name,
-            @PathVariable int z,
-            @PathVariable int x, @PathVariable int y, @RequestParam MultipartFile file) throws IOException {
+            @PathVariable @ApiParam("Tile Name") String name,
+            @PathVariable @ApiParam("Zoom Level") int z,
+            @PathVariable @ApiParam("X") int x,
+            @PathVariable @ApiParam("Y") int y,
+            @RequestParam @ApiParam("Tile File") MultipartFile file
+    ) throws IOException {
         if (config.readOnly) {
             new ResponseEntity<byte[]>(HttpStatus.METHOD_NOT_ALLOWED)
         } else {
@@ -323,9 +395,13 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/tile/{z}/{x}/{y}", method = RequestMethod.DELETE)
     @ResponseBody
+    @ApiOperation(value="Delete a Tile", notes="Delete a Tile")
     HttpEntity<byte[]> deleteTile(
-            @PathVariable String name,
-            @PathVariable int z, @PathVariable int x, @PathVariable int y) throws IOException {
+            @PathVariable @ApiParam("Tile Name") String name,
+            @PathVariable @ApiParam("Zoom Level") int z,
+            @PathVariable @ApiParam("X") int x,
+            @PathVariable @ApiParam("Y") int y
+    ) throws IOException {
         if (config.readOnly) {
             new ResponseEntity<byte[]>(HttpStatus.METHOD_NOT_ALLOWED)
         } else {
@@ -339,7 +415,10 @@ class Rest {
 
     @RequestMapping(value = "layers/{name}/gdal", method = RequestMethod.GET, produces = "text/xml")
     @ResponseBody
-    String getLayerGdal(@PathVariable String name) throws IOException {
+    @ApiOperation(value="Get Vector Layer GDAL Layer", notes="Get Vector Layer GDAL Layer")
+    String getLayerGdal(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) throws IOException {
         Layer layer = config.getVectorLayer(name)
         """<OGRVRTDataSource>
             <OGRVRTLayer name="${name}">
@@ -352,7 +431,10 @@ class Rest {
 
     @RequestMapping(value = "tiles/{name}/gdal", method = RequestMethod.GET, produces = "text/xml")
     @ResponseBody
-    String gdal(@PathVariable String name) throws IOException {
+    @ApiOperation(value="Get Tile Layer GDAL Layer", notes="Get Tile Layer GDAL Layer")
+    String gdal(
+            @PathVariable @ApiParam("Layer Name") String name
+    ) throws IOException {
         GeoPackage gpkg = config.getTileLayer(name)
         Bounds bounds = gpkg.bounds
         """<GDAL_WMS>

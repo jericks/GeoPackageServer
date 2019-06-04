@@ -13,6 +13,7 @@
 <body>
 
     <h1 class="fnt--blue">GeoPackage Server</h1>
+    <div><a href="swagger-ui.html">API</a></div>
 
     <h3>Layers</h3>
     <ul class="layers">
