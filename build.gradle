@@ -35,15 +35,11 @@ tasks.withType(Test) {
 }
 
 repositories {
-    mavenLocal()
     maven {
-        url "https://repo.boundlessgeo.com/main"
+        url "https://repo.osgeo.org/repository/release"
     }
     maven {
-        url "http://download.osgeo.org/webdav/geotools/"
-    }
-    maven {
-        url "https://github.com/ElectronicChartCentre/ecc-mvn-repo/raw/master/releases"
+        url "https://repo.osgeo.org/repository/snapshot"
     }
     mavenCentral()
 }
