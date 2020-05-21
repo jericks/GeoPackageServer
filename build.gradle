@@ -7,7 +7,7 @@ apply plugin: 'groovy'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'org.cugos'
-version = '0.5.0-SNAPSHOT'
+version = '0.5.0'
 sourceCompatibility = '1.8'
 
 jar {
@@ -56,7 +56,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.codehaus.groovy:groovy'
-    implementation("org.geoscript:geoscript-groovy:1.13.0") {
+    implementation("org.geoscript:geoscript-groovy:1.14.0") {
         exclude module: "gt-jdbc-postgis"
         exclude module: "gt-jdbc-h2"
         exclude module: "gt-jdbc-mysql"
