@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.5.RELEASE'
+    id 'org.springframework.boot' version '2.4.0'
     id 'com.adarshr.test-logger' version '2.1.0'
     id 'groovy'
 }
@@ -8,7 +8,7 @@ apply plugin: 'groovy'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'org.cugos'
-version = '0.6.0'
+version = '0.7.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 jar {
