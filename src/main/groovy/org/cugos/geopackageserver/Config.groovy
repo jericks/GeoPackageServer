@@ -2,7 +2,10 @@ package org.cugos.geopackageserver
 
 import geoscript.layer.GeoPackage
 import geoscript.layer.Layer
+import geoscript.style.DatabaseStyleRepository
+import geoscript.style.StyleRepository
 import geoscript.workspace.Workspace
+import groovy.sql.Sql
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
@@ -24,6 +27,8 @@ class Config implements WebServerFactoryCustomizer<ConfigurableServletWebServerF
 
     Workspace workspace
 
+    StyleRepository styleRepository
+
     @Value('${file}')
     private String fileName
 
@@ -31,6 +36,7 @@ class Config implements WebServerFactoryCustomizer<ConfigurableServletWebServerF
     private void post() {
         file = new File(fileName).canonicalFile
         workspace = new geoscript.workspace.GeoPackage(file)
+        styleRepository = DatabaseStyleRepository.forSqlite(workspace.sql)
     }
 
     List<String> getTileLayerNames() {
@@ -51,6 +57,26 @@ class Config implements WebServerFactoryCustomizer<ConfigurableServletWebServerF
 
     void deleteTileLayer(String name) {
         getTileLayer(name).delete()
+    }
+
+    List<Map<String,String>> getStyles() {
+        styleRepository.getAll()
+    }
+
+    List<Map<String, String>> getStylesForLayer(String layerName) {
+        styleRepository.getForLayer(layerName)
+    }
+
+    String getStyle(String layerName, String styleName) {
+        styleRepository.getForLayer(layerName, styleName)
+    }
+
+    void deleteStyle(String layerName, String styleName) {
+        styleRepository.delete(layerName, styleName)
+    }
+
+    void saveStyle(String layerName, String styleName, String style, Map options) {
+        styleRepository.save(layerName, styleName, style, options)
     }
 
     @Override

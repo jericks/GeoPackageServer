@@ -406,4 +406,70 @@ class RestReadWriteTest {
                 .andExpect(status().isOk()).andReturn()
         assertTrue result.response.contentAsByteArray.length > 0
     }
+
+    @Test
+    void getAllStyles() {
+        mockMvc.perform(get("/style"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$', hasSize(5)))
+                .andExpect(jsonPath('$[0].layerName', is('countries')))
+                .andExpect(jsonPath('$[0].styleName', is('countries')))
+                .andReturn()
+    }
+
+    @Test
+    void getAllStylesForLayer() {
+        mockMvc.perform(get("/style/countries"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$', hasSize(1)))
+                .andExpect(jsonPath('$[0].layerName', is('countries')))
+                .andExpect(jsonPath('$[0].styleName', is('countries')))
+                .andReturn()
+    }
+
+    @Test
+    void getStyle() {
+        mockMvc.perform(get("/style/countries/countries"))
+                .andExpect(status().isOk())
+                .andReturn()
+    }
+
+    @Test
+    void saveStyle() {
+        byte[] bytes = getClass().getClassLoader().getResource("countries.sld").bytes
+        mockMvc.perform(fileUpload("/style/countries/countries_beige").file("file", bytes))
+            .andExpect(status().isOk())
+
+        mockMvc.perform(get("/style"))
+            .andExpect(status().isOk())
+                .andExpect(jsonPath('$', hasSize(6)))
+                .andExpect(jsonPath('$[0].layerName', is('countries')))
+                .andExpect(jsonPath('$[0].styleName', is('countries')))
+                .andReturn()
+    }
+
+    @Test
+    void deleteStyle() {
+        byte[] bytes = getClass().getClassLoader().getResource("countries.sld").bytes
+        mockMvc.perform(fileUpload("/style/countries/countries_beige").file("file", bytes))
+                .andExpect(status().isOk())
+
+        mockMvc.perform(get("/style"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$', hasSize(6)))
+                .andExpect(jsonPath('$[0].layerName', is('countries')))
+                .andExpect(jsonPath('$[0].styleName', is('countries')))
+                .andReturn()
+
+        mockMvc.perform(delete("/style/countries/countries_beige"))
+                .andExpect(status().isOk())
+
+        mockMvc.perform(get("/style"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath('$', hasSize(5)))
+                .andExpect(jsonPath('$[0].layerName', is('countries')))
+                .andExpect(jsonPath('$[0].styleName', is('countries')))
+                .andReturn()
+
+    }
 }

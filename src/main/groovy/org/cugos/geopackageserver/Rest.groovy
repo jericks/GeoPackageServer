@@ -50,6 +50,7 @@ class Rest {
     ModelAndView home(Model model) {
         model.addAttribute("tiles", config.getTileLayerNames())
         model.addAttribute("layers", config.getVectorLayerNames())
+        model.addAttribute("styles", config.getStyles())
         new ModelAndView("home")
     }
 
@@ -458,6 +459,69 @@ class Rest {
      <Cache/>
  </GDAL_WMS>
  """
+    }
+
+    @RequestMapping(value = "style", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value="Get all styles", notes="Get all styles")
+    String getAllStyles() throws IOException {
+        List<Map<String,String>> styles = config.getStyles()
+        JsonOutput.prettyPrint(
+            JsonOutput.toJson(styles)
+        )
+    }
+
+    @RequestMapping(value = "style/{layerName}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value="Get all styles for a Layer", notes="Get all styles for a Layer")
+    String getAllStylesForLayer(
+            @PathVariable @ApiParam("Layer Name") String layerName
+    ) throws IOException {
+        List<Map<String,String>> styles = config.getStylesForLayer(layerName)
+        JsonOutput.prettyPrint(
+                JsonOutput.toJson(styles)
+        )
+    }
+
+    @RequestMapping(value = "style/{layerName}/{styleName}", method = RequestMethod.POST, produces = "text/xml")
+    @ResponseBody
+    @ApiOperation(value="Save a style", notes="Save a style")
+    ResponseEntity<String> saveStyle(
+            @PathVariable @ApiParam("Layer Name") String layerName,
+            @PathVariable @ApiParam("Style Name") String styleName,
+            @RequestBody @ApiParam("Style") MultipartFile file
+    ) throws IOException {
+        if (config.readOnly) {
+            new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
+        } else {
+            config.saveStyle(layerName, styleName, new String(file.bytes), [:])
+            new ResponseEntity<String>(HttpStatus.OK)
+        }
+    }
+
+    @RequestMapping(value = "style/{layerName}/{styleName}", method = RequestMethod.DELETE, produces = "text/xml")
+    @ResponseBody
+    @ApiOperation(value="Delete a style", notes="Delete a style")
+    ResponseEntity<String> deleteStyle(
+            @PathVariable @ApiParam("Layer Name") String layerName,
+            @PathVariable @ApiParam("Style Name") String styleName
+    ) throws IOException {
+        if (config.readOnly) {
+            new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED)
+        } else {
+            config.deleteStyle(layerName, styleName)
+            new ResponseEntity<String>(HttpStatus.OK)
+        }
+    }
+
+    @RequestMapping(value = "style/{layerName}/{styleName}", method = RequestMethod.GET, produces = "text/xml")
+    @ResponseBody
+    @ApiOperation(value="Get all styles for a Layer", notes="Get all styles for a Layer")
+    String getStyle(
+            @PathVariable @ApiParam("Layer Name") String layerName,
+            @PathVariable @ApiParam("Style Name") String styleName
+    ) throws IOException {
+        config.getStyle(layerName, styleName)
     }
 
     @ExceptionHandler(IllegalArgumentException)

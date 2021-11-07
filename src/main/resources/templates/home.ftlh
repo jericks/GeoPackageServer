@@ -22,6 +22,13 @@
         </#list>
     </ul>
 
+    <h3>Styles</h3>
+    <ul class="styles">
+        <#list styles as style>
+            <li><a href="style/${style.layerName}/${style.styleName}">${style.styleName}</a></li>
+        </#list>
+    </ul>
+
     <h3>Tiles</h3>
     <ul class="tiles">
         <#list tiles as tile>
