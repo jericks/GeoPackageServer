@@ -212,3 +212,33 @@ curl -o layer.xml http://localhost:8080/layers/countries/gdal && qgis layer.xml
 ```
 
 ![alt tag](docs/qgis_layer.png)
+
+**List all styles**
+
+```bash
+curl http://localhost:8080/style
+```
+
+**List all styles for a layer**
+
+```bash
+curl http://localhost:8080/style/countries
+```
+
+**Get a style**
+
+```bash
+curl http://localhost:8080/style/countries/countries
+```
+
+**Add a style**
+
+```bash
+curl -F "file=@countries.sld" http://localhost:8080/style/countries/countries
+```
+
+**Remove a style**
+
+```bash
+curl -X DELETE http://localhost:8080/style/countries/countries
+```
