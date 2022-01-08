@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/jericks/GeoPackageServer.svg?branch=master)](https://travis-ci.org/jericks/GeoPackageServer)
-
 [![Github Action](https://github.com/jericks/GeoPackageServer/workflows/Build/badge.svg)](https://github.com/jericks/GeoPackageServer/actions)
 
 GeoPackage Server
