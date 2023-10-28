@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.4'
+    id 'org.springframework.boot' version '2.7.17'
     id 'com.adarshr.test-logger' version '2.1.0'
     id 'groovy'
 }
@@ -9,7 +9,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'org.cugos'
 version = '0.7.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '11'
 
 jar {
     baseName = 'geopackageserver'
@@ -56,8 +56,8 @@ bootRun {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-freemarker'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.codehaus.groovy:groovy'
-    implementation("org.geoscript:geoscript-groovy:1.18.0") {
+    implementation 'org.apache.groovy:groovy'
+    implementation("org.geoscript:geoscript-groovy:1.21.0") {
         exclude module: "gt-jdbc-postgis"
         exclude module: "gt-jdbc-h2"
         exclude module: "gt-jdbc-mysql"
