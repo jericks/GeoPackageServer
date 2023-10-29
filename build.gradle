@@ -8,7 +8,7 @@ apply plugin: 'groovy'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'org.cugos'
-version = '0.7.0-SNAPSHOT'
+version = '0.7.0'
 sourceCompatibility = '11'
 
 jar {
